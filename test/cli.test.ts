@@ -62,4 +62,18 @@ describe("runCli", () => {
     expect(errorSpy).toHaveBeenCalled();
     errorSpy.mockRestore();
   });
+
+  it("returns exit code 1 and logs clean error message when review fails", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const code = await runCli([
+      "review",
+      "--repo",
+      "./nonexistent-dir-test-xyz",
+    ]);
+    expect(code).toBe(1);
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Error: Repository path does not exist"),
+    );
+    errorSpy.mockRestore();
+  });
 });

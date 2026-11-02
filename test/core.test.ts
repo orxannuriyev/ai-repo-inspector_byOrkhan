@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { reviewRepository } from "../src/core.js";
 
@@ -8,6 +11,19 @@ describe("reviewRepository", () => {
         repositoryPath: "./nonexistent-directory-abc-123",
       }),
     ).rejects.toThrow("Repository path does not exist");
+  });
+
+  it("throws when path exists but is not a git repository", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "non-git-repo-"));
+    try {
+      await expect(
+        reviewRepository({
+          repositoryPath: tempDir,
+        }),
+      ).rejects.toThrow("Not a git repository");
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it("produces a valid markdown report for the current repository", async () => {

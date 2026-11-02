@@ -44,18 +44,24 @@ export async function runCli(argv: string[]): Promise<number> {
     return 1;
   }
 
-  const report = await reviewRepository({
-    repositoryPath: args.repositoryPath,
-    baseRef: args.baseRef,
-    validationCommands: args.validations,
-    format: args.format,
-  });
+  try {
+    const report = await reviewRepository({
+      repositoryPath: args.repositoryPath,
+      baseRef: args.baseRef,
+      validationCommands: args.validations,
+      format: args.format,
+    });
 
-  const outputFile =
-    args.format === "json" ? "review-report.json" : "review-report.md";
-  writeFileSync(outputFile, report, "utf8");
-  console.log(`Review report written to ${outputFile}`);
-  return 0;
+    const outputFile =
+      args.format === "json" ? "review-report.json" : "review-report.md";
+    writeFileSync(outputFile, report, "utf8");
+    console.log(`Review report written to ${outputFile}`);
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Error: ${message}`);
+    return 1;
+  }
 }
 
 function isCurrentScriptExecuted(): boolean {
